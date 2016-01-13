@@ -5,4 +5,4 @@ SYSIMG     IMAGE    "./material/startup.png"
 
 MAINTHEME  SOUND    "./material/BigPresent.ogg"
 
-DEFAULTIMG IMAGE "./material/default.png"
+DEFAULTIMG IMAGE    "./material/default.png"

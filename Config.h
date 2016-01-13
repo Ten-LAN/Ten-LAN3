@@ -10,47 +10,51 @@
 class Config
 {
 private:
-  char gamedir[ GAMEDIR_LEN ];
-  int volumemax;
-  class Key *key;
-  int pad2keysleep;
+	char gamedir[ GAMEDIR_LEN ];
+	int volumemax;
+	class Key *key;
+	int pad2keysleep;
 
-  // 終了時間。
-  int exittime;
-  // 展示モード
-  int exhibition;
-  // タスクバーを隠す。
-  int hidetaskbar;
-  // カテゴリを表示する。
-  int viewcategory;
-  // 新作情報を出す。
-  int viewnewgame;
-  // DVD収録情報を出す。
-  int viewdvd;
+	// UIの種類。
+	int ui;
 
-  // ログCGI。
-  char *logcgi;
+	// 終了時間。
+	int exittime;
+	// 展示モード
+	int exhibition;
+	// タスクバーを隠す。
+	int hidetaskbar;
+	// カテゴリを表示する。
+	int viewcategory;
+	// 新作情報を出す。
+	int viewnewgame;
+	// DVD収録情報を出す。
+	int viewdvd;
 
-  virtual int Init( class Key *key );
+	// ログCGI。
+	char *logcgi;
+
+	virtual int Init( class Key *key );
 public:
-  Config( void );
-  Config( class Key * key );
-  virtual ~Config( void );
+	Config( void );
+	Config( class Key * key );
+	virtual ~Config( void );
 
-  virtual int SetKeyClass( class Key * key );
-  virtual class Key * GetKeyClass( void );
+	virtual int SetKeyClass( class Key * key );
+	virtual class Key * GetKeyClass( void );
 
-  virtual const char * GetGameDirectory( void );
+	virtual const char * GetGameDirectory( void );
 
-  virtual int GetMode(void);
-  virtual int IsHideTaskbar( void );
-  virtual int IsViewCategory( void );
-  virtual int IsViewNewGame( void );
-  virtual int IsViewDVD( void );
-  virtual int GetExitTime(void);
-  virtual const char * GetLogCGIURL( void );
+	virtual int GetMode( void );
+	virtual int GetUIType( void );
+	virtual int IsHideTaskbar( void );
+	virtual int IsViewCategory( void );
+	virtual int IsViewNewGame( void );
+	virtual int IsViewDVD( void );
+	virtual int GetExitTime( void );
+	virtual const char * GetLogCGIURL( void );
 
-  virtual int SaveConfig( int mode, int arg );
-  virtual int LoadConfig( const char *config );
+	virtual int SaveConfig( int mode, int arg );
+	virtual int LoadConfig( const char *config );
 };
 #endif

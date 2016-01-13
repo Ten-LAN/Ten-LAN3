@@ -10,6 +10,7 @@
 *.res
 *.log
 *.lastbuildstate
+*.opensdf
 
 # Compiled Dynamic libraries
 *.so
@@ -21,8 +22,13 @@
 *.la
 *.a
 *.lib
+*.ilk
+*.idb
 
 # Executables
 *.exe
 *.out
 *.app
+
+# GameDirectory
+Game/*

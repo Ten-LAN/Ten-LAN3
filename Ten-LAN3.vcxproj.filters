@@ -13,6 +13,9 @@
       <UniqueIdentifier>{470d2c18-763e-447b-90c9-e73fc20b337b}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
     </Filter>
+    <Filter Include="DefaultUI">
+      <UniqueIdentifier>{e9ba0659-0f3f-4b8c-ac9c-376d2b05a86b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Ten-LAN3.cpp">
@@ -28,6 +31,12 @@
       <Filter>ソース</Filter>
     </ClCompile>
     <ClCompile Include="TenLAN.cpp">
+      <Filter>ソース</Filter>
+    </ClCompile>
+    <ClCompile Include="UI\DefaultUI.cpp">
+      <Filter>DefaultUI</Filter>
+    </ClCompile>
+    <ClCompile Include="GetTenLANUI.cpp">
       <Filter>ソース</Filter>
     </ClCompile>
   </ItemGroup>
@@ -53,6 +62,12 @@
     </ClInclude>
     <ClInclude Include="TenLAN.h">
       <Filter>ヘッダー</Filter>
+    </ClInclude>
+    <ClInclude Include="DefaultGameView.h">
+      <Filter>ヘッダー</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\DefaultUI.h">
+      <Filter>DefaultUI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
