@@ -3,6 +3,13 @@
 *.lo
 *.o
 *.obj
+*.tlog
+*.pdb
+*.sdf
+*.db
+*.res
+*.log
+*.lastbuildstate
 
 # Compiled Dynamic libraries
 *.so
@@ -19,9 +26,3 @@
 *.exe
 *.out
 *.app
-*.tlog
-*.pdb
-*.sdf
-*.db
-*.res
-*.log
