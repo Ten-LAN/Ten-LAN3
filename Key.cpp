@@ -141,7 +141,7 @@ int Key::InvalidKeyConfig( unsigned int padnum )
 	return 0;
 }
 
-int Key::ESCCannon( unsigned int padnum )
+int Key::ESCCannon(HWND gamewindow, unsigned int padnum )
 {
 	int i;
 
@@ -156,8 +156,14 @@ int Key::ESCCannon( unsigned int padnum )
 			break;
 		}
 	}
+
 	// ESC砲発射。
-	_MikanInput->SendKey( K_ESC, 1 );
+	// SendKeyはよくないみたいなので別の方法で
+	//_MikanInput->SendKey( K_ESC, 1 );
+
+	// ウィンドウを閉じる命令(WindowsAPI)
+	SendMessage(gamewindow, WM_SYSCOMMAND, SC_CLOSE, 0);
+
 	return 1;
 }
 

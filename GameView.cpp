@@ -13,7 +13,7 @@ unsigned long CATE_COLOR[ CATEGORY_MAX ] =
 	0x0000a411, // テーブル
 	0x00008f9a, // シミュレーション
 	0x00004eff, // ロールプレイング
-	0x00cf00ff, // 対戦
+	0x00cf00ff, // 多人数
 	0x00f400ff, // ミニゲーム
 	0x00808080, // その他
 };
@@ -28,7 +28,7 @@ unsigned long CATE_DCOLOR[ CATEGORY_MAX ] =
 	0x001b8927, // テーブル
 	0x001a7980, // シミュレーション
 	0x002a5ed5, // ロールプレイング
-	0x00a93fc1, // 対戦
+	0x00a93fc1, // 多人数
 	0x00bb3ec1, // ミニゲーム
 	0x00575757, // その他
 };
@@ -43,7 +43,7 @@ char CATE_NAME[ CATEGORY_MAX ][ 32 ] =
 	"テーブル",
 	"シミュレーション",
 	"ロールプレイング",
-	"対戦",
+	"多人数",
 	"ミニゲーム",
 	"その他",
 };
@@ -59,7 +59,7 @@ int CATE_SORT[ CATEGORY_MAX ] =
 	7,  // ロールプレイング
 	5,  // テーブル
 	2,  // スポーツ
-	8,  // 対戦
+	8,  // 多人数
 	9,  // ミニゲーム
 	10, // その他
 };
@@ -228,13 +228,15 @@ void BackGround::CleanUp( void )
 void OP::UserInit( void )
 {
 	timer = 0;
+	MikanSound->Play(0, true);
+	MikanSound->SetVolume(0, system->GetConfig()->GetBGMVolume());
 	//tex = system->AddTexture( "./material/op.png" );
 #ifndef _DEBUG
 	//if (system->GetMode())
 	//{
-	MikanSound->Load( 0, NULL, "MAINTHEME" );
-	MikanSound->Play( 0, true );
-	MikanSound->SetVolume( 0, 80 );
+	//MikanSound->Load( 0, NULL, "MAINTHEME" );
+	//MikanSound->Play( 0, true );
+	//MikanSound->SetVolume( 0, 80 );
 	//}
 #endif
 }

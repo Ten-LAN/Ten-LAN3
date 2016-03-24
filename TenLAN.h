@@ -61,10 +61,23 @@ private:
 	// テクスチャ管理。
 	unsigned int texmax;
 
+	// 統計処理に使うための日付(月、日、年の順)
+	int date[3];
+
+	// デバッグモード関係
+	bool debug;
+
 	virtual int NextGameView( void );
 	virtual int CleanupExecGame( void );
 	virtual int TextureCheck( const char *filename );
 	virtual int AddLog( unsigned int gamenum, unsigned long playtime );
+
+	// 統計の読み込みを行う関数(ゲームデータを読み込んだ後に行うこと!)
+	virtual int LoadStatistics();
+
+	// 統計の保存を行う関数
+	virtual int SaveStatistics(unsigned int gamenum, unsigned long playtime);
+
 public:
 	TenLANSystem( void );
 	virtual ~TenLANSystem( void );
@@ -177,6 +190,13 @@ public:
 	// ! ゲームが最新年度のものかどうかの判別。
 	virtual int IsNewGame( unsigned int gamenum );
 
+	// デバッグモード関係
+
+	// ! デバッグモードかどうかの取得(trueでデバッグモード)
+	virtual bool IsDebug( void );
+	// !デバッグモードの設定(trueでデバッグモード)
+	virtual int SetDebug( bool debugmode );
+
 	virtual int GetUp( void );
 	virtual int GetDown( void );
 	virtual int GetLeft( void );
@@ -207,7 +227,7 @@ public:
 		return 0;
 	}
 	// ! GameViewが破棄される前に実行される片付けフェーズ。
-	virtual void CleanUp( void ){}
+	virtual void CleanUp(void){}
 };
 
 #define GAMEDATA_EXE_LEN   512
@@ -215,6 +235,14 @@ public:
 #define GAMEDATA_TEXT_LEN  1024
 #define GAMEDATA_TEX_LEN   512
 
+// 統計データの構造体
+struct StatisticsData
+{
+	unsigned int playnum;	// プレイ回数
+	unsigned long playtime;	//プレイ時間
+};
+
+//ゲームデータの構造体
 struct GameData
 {
 	unsigned int num;                 // ゲーム番号。
@@ -229,6 +257,8 @@ struct GameData
 	unsigned int cnum;                // 持っているカテゴリ数。
 	char category[ CATEGORY_MAX ];    // どのカテゴリに所属しているか。
 	char dvd;                         // DVD収録済みかどうか。
+
+	StatisticsData today, total;	  // 統計データ
 };
 
 

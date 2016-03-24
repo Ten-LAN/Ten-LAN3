@@ -2,6 +2,8 @@
 #include <time.h>
 
 const char LOGFILE[] = "gamelog.txt";
+const char STATISTICS_H[] = "statistics";
+const char STATISTICS_T[] = ".txt";
 
 unsigned int atou( const char *str )
 {
@@ -53,6 +55,7 @@ TenLANSystem::TenLANSystem( void )
 
 	config->LoadConfig( "config.ini" );
 
+	SetDebug(false);
 
 	GetCurrentDirectory( 512, curdir );
 
@@ -145,6 +148,12 @@ int TenLANSystem::AddLog( unsigned int gamenum, unsigned long playtime )
 	// ゲームの起動ログやカウントアップ要請。
 	time_t now = time( NULL );
 
+	// デバッグモードなら保存をしない
+	if (IsDebug())
+	{
+		return 0;
+	}
+
 	if(MikanFile->Open( 0, LOGFILE, "a+" ) >= 0)
 	{
 		MikanFile->Printf( 0, "%lld\t%d\t%s\t%lu\t\n", now, gamenum, gamedata[ gamenum ].title, playtime );
@@ -163,7 +172,253 @@ int TenLANSystem::AddLog( unsigned int gamenum, unsigned long playtime )
 		MikanSystem->RunThread( THREAD_ADDLOG, AddPlayGame, (void *)address );
 	}
 
+	SaveStatistics(gamenum, playtime);
+
 	return 0;
+}
+
+// 統計を読み込む関数
+int TenLANSystem::LoadStatistics()
+{
+	time_t now;
+	struct tm t;
+	FILE* file;
+	char stfile[512];
+
+	// 今日の日付を取得
+	time(&now);
+	localtime_s(&t, &now);
+	date[0] = t.tm_mon + 1;
+	date[1] = t.tm_mday;
+	date[2] = t.tm_year + 1900;
+
+	// 統計の合計を読み込み
+
+	// 統計の合計のファイル名を生成
+	sprintf_s(stfile, 512, "%s_total%s", STATISTICS_H, STATISTICS_T);
+
+	if (fopen_s(&file, stfile, "r") == 0)
+	{
+		int check;
+		while (1)
+		{
+			int number;// ゲーム識別番号用
+			int pnum;// プレイ回数用
+			int total_h = 0, total_m = 0, total_s = 0;// 総プレイ時間用
+			int ave_m = 0, ave_s = 0;// 平均時間用
+
+			char title[2048];// タイトル用
+
+			// 番号 ゲーム名 プレイ回数 総プレイ時間(時間、分、秒) 平均プレイ時間(分、秒)
+			check = fscanf_s(file, "%d %s %d回 %d:%d:%d %d:%d",
+				&number, title, sizeof(title), &pnum, &total_h, &total_m, &total_s,
+				&ave_m, &ave_s);
+
+			// 読み込みが終われば終了
+			if (check == EOF)
+			{
+				break;
+			}
+
+			// 読み込んだゲームにその番号のものを探してデータ代入
+			for (unsigned int n = 0; n < gamemax; n++)
+			{
+				if (gamedata[n].num == number)
+				{
+					gamedata[n].total.playnum = pnum;
+					gamedata[n].total.playtime = total_h * 3600 + total_m * 60 + total_s;
+
+					break;
+				}
+			}
+		}
+		fclose(file);
+	}
+
+	// 今日の統計ファイル名を生成
+	sprintf_s(stfile, 512, "%s%d_%02d_%04d%s",
+		STATISTICS_H, date[0], date[1], date[2], STATISTICS_T);
+
+	// 次にこの日の統計を読み込み
+	// 統計データを保存したファイルを開く
+	if (fopen_s(&file, stfile, "r") == 0)
+	{
+		int check;
+		while (1)
+		{
+			int number;// ゲーム識別番号用
+			int pnum;// プレイ回数用
+			int total_h = 0, total_m = 0, total_s = 0;// 総プレイ時間用
+			int ave_m = 0, ave_s = 0;// 平均時間用
+
+			char title[2048];// タイトル用
+
+			// 番号 ゲーム名 プレイ回数 総プレイ時間(時間、分、秒) 平均プレイ時間(分、秒)
+			check = fscanf_s(file, "%d %s %d回 %d:%d:%d %d:%d",
+				&number, title, sizeof(title), &pnum, &total_h, &total_m, &total_s,
+				&ave_m, &ave_s);
+
+			// 読み込みが終われば終了
+			if (check == EOF)
+			{
+				break;
+			}
+
+			// 読み込んだゲームにその番号のものを探してデータ代入
+			for (unsigned int n = 0; n < gamemax; n++)
+			{
+				if (gamedata[n].num == number)
+				{
+					gamedata[n].today.playnum = pnum;
+					gamedata[n].today.playtime = total_h * 3600 + total_m * 60 + total_s;
+
+					break;
+				}
+			}
+		}
+		fclose(file);
+	}
+
+	return 1;
+}
+
+// 統計を保存する関数
+int TenLANSystem::SaveStatistics(unsigned int gamenum, unsigned long playtime)
+{
+	// デバッグモードなら終了
+	if (IsDebug())
+	{
+		return 0;
+	}
+
+	time_t now;
+	struct tm t;
+	FILE* file;
+	char stfile[512];
+	int curdate[3];
+
+	// 現在の日付を取得
+	time(&now);
+	localtime_s(&t, &now);
+	curdate[0] = t.tm_mon + 1;
+	curdate[1] = t.tm_mday;
+	curdate[2] = t.tm_year + 1900;
+
+	// ゲームの統計データの更新
+
+	// まず日付が変わっていたら今日の統計をリセット
+	for (int i = 0; i < 3; i++)
+	{
+		if (date[i] != curdate[i])
+		{
+			// 日付修正
+			for (int j = i; j < 3; j++)
+			{
+				date[j] = curdate[j];
+			}
+			// ゲームの今日の統計をリセット
+			for (unsigned int n = 0; n < gamemax; n++)
+			{
+				gamedata[n].today.playnum = 0;
+				gamedata[n].today.playtime = 0;
+			}
+		}
+	}
+	// 次に今プレイしたデータを加える
+	gamedata[gamenum].total.playnum++;
+	gamedata[gamenum].total.playtime += playtime;
+	gamedata[gamenum].today.playnum++;
+	gamedata[gamenum].today.playtime += playtime;
+
+	// まずは統計の合計を保存
+
+	// 統計の合計のファイル名を生成
+	sprintf_s(stfile, 512, "%s_total%s", STATISTICS_H, STATISTICS_T);
+
+	if (fopen_s(&file, stfile, "w") == 0)
+	{
+		for (unsigned int n = 0; n < gamemax; n++)
+		{
+			// 平均プレイ時間(秒)
+			int ave = 0;
+			if (gamedata[n].total.playnum > 0)
+			{
+				ave = gamedata[n].total.playtime / gamedata[n].total.playnum;
+			}
+
+			// タイトル(改行コードや空白の修正)
+			char title[2048];
+			strcpy_s(title, sizeof(title), gamedata[n].title);
+			for (int i = 0; title[i] != '\0'; i++)
+			{
+				if (title[i] == '\n')
+				{
+					title[i] = '\0';
+					break;
+				}
+
+				if (title[i] == ' ')
+				{
+					title[i] = '_';
+				}
+			}
+
+			// 番号 ゲーム名 プレイ回数 総プレイ時間(時間、分、秒) 平均プレイ時間(分、秒)
+			fprintf_s(file, "%d %s %03d回 %02d:%02d:%02d %02d:%02d\n\0",
+				gamedata[n].num, title, gamedata[n].total.playnum,
+				gamedata[n].total.playtime / 3600,
+				(gamedata[n].total.playtime % 3600) / 60,
+				gamedata[n].total.playtime % 60,
+				ave / 60, ave % 60);
+		}
+
+		fclose(file);
+	}
+
+	sprintf_s(stfile, 512, "%s%d_%02d_%04d%s", STATISTICS_H,
+		date[0], date[1], date[2], STATISTICS_T);
+
+	if (fopen_s(&file, stfile, "w") == 0)
+	{
+		for (unsigned int n = 0; n < gamemax; n++)
+		{
+			// 平均プレイ時間(秒)
+			int ave = 0;
+			if (gamedata[n].today.playnum > 0)
+			{
+				ave = gamedata[n].today.playtime / gamedata[n].today.playnum;
+			}
+
+			// タイトル(改行コードや空白の修正)
+			char title[2048];
+			strcpy_s(title, sizeof(title), gamedata[n].title);
+			for (int i = 0; title[i] != '\0'; i++)
+			{
+				if (title[i] == '\n')
+				{
+					title[i] = '\0';
+					break;
+				}
+
+				if (title[i] == ' ')
+				{
+					title[i] = '_';
+				}
+			}
+
+			// 番号 ゲーム名 プレイ回数 総プレイ時間(時間、分、秒) 平均プレイ時間(分、秒)
+			fprintf_s(file, "%d %s %03d回 %02d:%02d:%02d %02d:%02d\n\0",
+				gamedata[n].num, title, gamedata[n].today.playnum,
+				gamedata[n].today.playtime / 3600,
+				(gamedata[n].today.playtime % 3600) / 60,
+				gamedata[n].today.playtime % 60,
+				ave / 60, ave % 60);
+		}
+
+		fclose(file);
+	}
+
+	return 1;
 }
 
 int TenLANSystem::SetGameView( class GameView *newgameview )
@@ -185,8 +440,14 @@ int TenLANSystem::PlayGameView( void )
 	switch(mode)
 	{
 	case TENLAN_PLAY: // 選択画面やOPなど。
+		//デバッグモードの切り替え
+		if (MikanInput->GetKeyNum(K_T) == 1 || MikanInput->GetPadNum(0,PAD_J) == 1)
+		{
+			SetDebug(!IsDebug());
+		}
 		ret = now->MainLoop();
 		break;
+
 	case TENLAN_WAIT: // ゲーム起動中。
 
 		//if ( CheckEndProcess() )
@@ -199,7 +460,7 @@ int TenLANSystem::PlayGameView( void )
 		//}
 
 		//if ( background ){ ret = background->MainLoop(); }
-
+		
 		do
 		{
 			//ゲームパッド入力の更新
@@ -215,6 +476,9 @@ int TenLANSystem::PlayGameView( void )
 
 			ESCCannon();
 
+			SetForegroundWindow(gamewindow);
+			
+
 			MikanSystem->WaitNextFrame( 0 );
 		} while(!CheckEndProcess());
 		// ゲーム実行終了後の後片付けを行う。
@@ -226,10 +490,12 @@ int TenLANSystem::PlayGameView( void )
 	case TENLAN_NEXTPLAY:
 
 		_MikanInput->ReleaseAllPad2Key();
-		_MikanInput->SendKey( K_ESC, 0 );
+		//_MikanInput->SendKey( K_ESC, 0 );// SendKeyは危ないので停止
 		if(config->GetMode())
 		{
-			_MikanWindow->SetWindow( WT_NORESIZEFULLSCREEN );
+			// これやるとDXライブラリ製の全画面にしないゲームでバグる
+			// よってコメントアウトしてます
+			//_MikanWindow->SetWindow( WT_NORESIZEFULLSCREEN );
 		}
 		_MikanDraw->RecoverFromDeviceLost( 1 );
 		mode = TENLAN_PLAY;
@@ -407,6 +673,11 @@ int TenLANSystem::InitGamelist( int gamemax, int *loadgame )
 						sprintf_s( gamedata[ msel ].txfile, GAMEDATA_TEX_LEN, "%s\\%s\\%s\\%s", gamedata[ msel ].txfile, config->GetGameDirectory(), status.cFileName, "ss.png" );
 						gamedata[ msel ].txnum = AddTexture( gamedata[ msel ].txfile );
 						//MikanDraw->CreateTexture( gd[ msel ].txnum, gd[ msel ].txfile, TRC_NONE );
+						// ゲームの統計データを初期化
+						gamedata[ msel ].today.playnum = 0;
+						gamedata[ msel ].today.playtime = 0;
+						gamedata[ msel ].total.playnum = 0;
+						gamedata[ msel ].total.playtime = 0;
 						++msel;
 
 						// 最大ゲーム数。
@@ -420,6 +691,9 @@ int TenLANSystem::InitGamelist( int gamemax, int *loadgame )
 			}
 		} while(FindNextFile( hdir, &status ));
 		FindClose( hdir );
+
+		// 統計データの読み込み
+		LoadStatistics();
 	}
 
 	// newlineを年度に変換したい。
@@ -474,7 +748,7 @@ int TenLANSystem::GetGamedirDirectorys( void )
 	return count;
 }
 
-int debugmode = 1;
+int debugmode = 0;
 
 int TenLANSystem::ExecGame( unsigned int gamenum )
 {
@@ -482,7 +756,7 @@ int TenLANSystem::ExecGame( unsigned int gamenum )
 	DWORD startpid, errcode;
 	HWND hw;
 
-	MikanSound->PauseAll();
+	MikanSound->StopAll();
 
 	// モード変更
 	//mode = TENLAN_WAIT;
@@ -616,8 +890,8 @@ int TenLANSystem::CleanupExecGame( void )
 
 	execgamenum = -1;
 
-	MikanSound->Play( 0, true );
-	MikanSound->SetVolume( 0, 80 );
+	//MikanSound->Play( 0, true );
+	//MikanSound->SetVolume( 0, 80 );
 
 
 	return 0;
@@ -712,7 +986,7 @@ int TenLANSystem::RestoreTaskbar( void )
 int TenLANSystem::ESCCannon( void )
 {
 	// TODO:メインのパッド情報があればそれを指定するとか、すべてのパッドに対応させるとかしよう。
-	return config->GetKeyClass()->ESCCannon();
+	return config->GetKeyClass()->ESCCannon(gamewindow);
 }
 
 
@@ -1015,6 +1289,17 @@ int TenLANSystem::GetLeft( void ){
 }
 int TenLANSystem::GetRight( void ){
 	return key->GetRight();
+}
+
+bool TenLANSystem::IsDebug( void )
+{
+	return debug;
+}
+int TenLANSystem::SetDebug( bool debugmode )
+{
+	debug = debugmode;
+
+	return 0;
 }
 
 int TenLANSystem::GetY( void ){

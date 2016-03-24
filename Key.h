@@ -49,7 +49,7 @@ public:
 	virtual int SetKeyConfig( unsigned int padnum );
 	virtual int InvalidKeyConfig( unsigned int padnum );
 
-	virtual int ESCCannon( unsigned int padnum = 0 );
+	virtual int ESCCannon(HWND gamewindow, unsigned int padnum = 0);
 
 	virtual int GetUp( void );
 	virtual int GetDown( void );

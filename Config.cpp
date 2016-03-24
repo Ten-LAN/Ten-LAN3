@@ -29,6 +29,9 @@ int Config::Init( class Key *key )
 
 	ui = 0;
 
+	bgmvolume = 20;
+	sevolume = 80;
+
 	return 0;
 }
 
@@ -72,6 +75,16 @@ int Config::GetMode( void )
 int Config::GetUIType( void )
 {
 	return ui;
+}
+
+int Config::GetBGMVolume(void)
+{
+	return bgmvolume;
+}
+
+int Config::GetSEVolume(void)
+{
+	return sevolume;
 }
 
 int Config::IsHideTaskbar( void )
@@ -179,7 +192,24 @@ int Config::LoadConfig( const char *config )
 			if(strcmp( str, "SOUND_VOLUME" ) == 0)
 			{
 				//sys.maxvolume = atoi( strtok_s( NULL, ",", &tok ) );
-				volumemax = atoi( strtok_s( NULL, ",", &tok ) );
+				bgmvolume = atoi(strtok_s(NULL, ",", &tok));
+				if (bgmvolume < 0)
+				{
+					bgmvolume = 0;
+				}
+				else if (bgmvolume > 100)
+				{
+					bgmvolume = 100;
+				}
+				sevolume = atoi(strtok_s(NULL, ",", &tok));
+				if (sevolume < 0)
+				{
+					sevolume = 0;
+				}
+				else if (sevolume > 100)
+				{
+					sevolume = 100;
+				}
 			} else if(key && strcmp( str, "PAD" ) == 0)
 			{
 

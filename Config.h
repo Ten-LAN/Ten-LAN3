@@ -11,7 +11,7 @@ class Config
 {
 private:
 	char gamedir[ GAMEDIR_LEN ];
-	int volumemax;
+	int bgmvolume, sevolume;
 	class Key *key;
 	int pad2keysleep;
 
@@ -46,7 +46,9 @@ public:
 	virtual const char * GetGameDirectory( void );
 
 	virtual int GetMode( void );
-	virtual int GetUIType( void );
+	virtual int GetUIType(void);
+	virtual int GetBGMVolume(void);
+	virtual int GetSEVolume( void );
 	virtual int IsHideTaskbar( void );
 	virtual int IsViewCategory( void );
 	virtual int IsViewNewGame( void );

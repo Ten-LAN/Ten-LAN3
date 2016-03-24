@@ -35,8 +35,9 @@ int MainLoop( void )
 
 	if(MikanInput->GetKeyNum( K_R ) == 1)
 	{
-		_MikanWindow->SetWindow( WT_NORESIZEFULLSCREEN );
-		_MikanDraw->RecoverFromDeviceLost( 1 );
+		// これをやるとDXライブラリ製ゲームで全画面化しない
+		//_MikanWindow->SetWindow( WT_NORESIZEFULLSCREEN );
+		_MikanDraw->RecoverFromDeviceLost(1);
 	}
 	return ( MikanInput->GetKeyNum( K_ESC ) > tenlan->GetExitTime() );
 }
