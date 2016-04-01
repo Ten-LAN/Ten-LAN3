@@ -253,6 +253,7 @@ struct GameData
 	unsigned int date;                // 日付。
 	int pad2key;                      // Pad2Keyが有効かどうか。
 	int txnum;                        // 説明画像のテクスチャ番号。
+	int imagenum;                     // 画像の枚数
 	char txfile[ GAMEDATA_TEX_LEN ];  // テクスチャのファイルパス。
 	unsigned int cnum;                // 持っているカテゴリ数。
 	char category[ CATEGORY_MAX ];    // どのカテゴリに所属しているか。

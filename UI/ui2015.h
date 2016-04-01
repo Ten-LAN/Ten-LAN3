@@ -57,6 +57,7 @@ private:
 	virtual int ExecGame(int gamenum);
 	virtual int PrevSelectNumber(int select);
 	virtual int NextSelectNumber(int select);
+	virtual void GetSSSize(int *ssx, int *ssy, double *scale, int gamenum);
 public:
 	virtual void UserInit(void);
 	virtual void Resume(void);

@@ -591,7 +591,8 @@ int TenLANSystem::InitGamelist( int gamemax, int *loadgame )
 						gamedata[ msel ].date = 0;
 						gamedata[ msel ].pad2key = 1;
 						gamedata[ msel ].cnum = 0;
-						gamedata[ msel ].category[ 0 ] = 0;
+						gamedata[msel].category[0] = 0;
+						gamedata[msel].imagenum = 1;
 						while(MikanFile->ReadLine( 0, buf, 512 ))
 						{
 							str = strtok_s( buf, "=", &tok );
@@ -661,6 +662,10 @@ int TenLANSystem::InitGamelist( int gamemax, int *loadgame )
 								}
 								++usecate[ gamedata[ msel ].category[ gamedata[ msel ].cnum ] ];
 								++gamedata[ msel ].cnum;
+							}
+							else if (strcmp(str, "imagenum") == 0)
+							{
+								gamedata[msel].imagenum = atoi(strtok_s(NULL, "=", &tok));
 							}
 						}
 						MikanFile->Close( 0 );
@@ -1233,7 +1238,7 @@ int TenLANSystem::GetGameSSTMax( unsigned int gamenum )
 		return 0;
 	}
 
-	return MikanDraw->GetTextureHeight( gamedata[ gamenum ].txnum ) / 480;
+	return gamedata[gamenum].imagenum;
 }
 
 int TenLANSystem::IsInDVD( unsigned int gamenum )

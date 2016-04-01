@@ -465,6 +465,37 @@ int UI2015::DrawSetting(void) {
 	return 1;
 }
 
+// スクリーンショットのサイズを得る
+void UI2015::GetSSSize(int *ssx, int *ssy, double *scale, int gamenum)
+{
+	// スクリーンショットの大きさ
+	*ssx = MikanDraw->GetTextureWidth(system->GetGameSSTexture(gamenum));
+	*ssy = MikanDraw->GetTextureHeight(system->GetGameSSTexture(gamenum));
+	// 局所変数のために{}でくくる
+	int ssnum = system->GetGameSSTMax(gamenum);
+	if (ssnum <= 0)
+	{
+		ssnum = 1;
+	}
+	*ssy /= ssnum;
+
+	// 大きさに合わせて拡大率を変更
+	{
+		double drawx = 640.0;
+		double drawy = 480.0;
+		// 横に長い場合
+		if (drawy / drawx > (double)(*ssy) / (double)(*ssx))
+		{
+			*scale = drawx / (double)(*ssx);
+		}
+		// 縦に長い場合
+		else
+		{
+			*scale = drawy / (double)(*ssy);
+		}
+	}
+}
+
 int UI2015::DrawInfomation(int acinput) {
 	int dx, dy;
 	int atimer = 10;
@@ -472,6 +503,12 @@ int UI2015::DrawInfomation(int acinput) {
 	double scl, tmp;
 	int i, max = 0;
 	static int stTime = 0;
+
+	// スクリーンショットの大きさ
+	int ssx = 640;
+	int ssy = 480;
+	double size_scale = 1.0;
+	GetSSSize(&ssx, &ssy, &size_scale, game[selectgame]);
 
 	DrawBackground();
 
@@ -506,12 +543,13 @@ int UI2015::DrawInfomation(int acinput) {
 			MikanDraw->DrawTextureScalingC(system->GetGameSSTexture(game[selectgame]),
 				(int)(centerline + dx + 640 * (scl * infoy / system->GetHeight())),
 				(int)(dy + 25 * scale * infoy / system->GetHeight()),
-				0, 480, 640, 480, (tmp + (scl - tmp) * infoy / system->GetHeight()) * 0.9);
+				0, ssy, ssx, ssy,
+				(tmp + (scl - tmp) * infoy / system->GetHeight()) * 0.9 * size_scale);
 		}
 
 		MikanDraw->DrawTextureScalingC(system->GetGameSSTexture(game[selectgame]),
 			(int)(centerline + dx), (int)(dy + 25 * scale * infoy / system->GetHeight()), 0,
-			0, 640, 480, tmp + (scl - tmp) * infoy / system->GetHeight());
+			0, ssx, ssy, (tmp + (scl - tmp) * infoy / system->GetHeight()) * size_scale);
 
 		// ゲーム情報。
 		dx = 0;
@@ -554,9 +592,9 @@ int UI2015::DrawInfomation(int acinput) {
 			if (0 <= infonum + i && infonum + i < max) {
 				MikanDraw->DrawTextureScalingC(system->GetGameSSTexture(game[selectgame]),
 					(int)(centerline + dx + 640 * scl * i + infox), (int)(dy + 25 * scale * infoy / system->GetHeight()),
-					0, 480 * (infonum + i), 640, 480,
+					0, ssy * (infonum + i), ssx, ssy,
 					//boxsize * tmp * 1.4, boxsize * tmp * 480.0 / 640.0 * 1.4, 0
-					scl * (1.0 - 0.1*fabs(640 * scl * i + infox) / (640 * scl))
+					scl * (1.0 - 0.1*fabs(640 * scl * i + infox) / (640 * scl))* size_scale
 					);
 				/*MikanDraw->DrawTextureScalingC(system->GetGameSSTexture(game[selectgame]),
 				(int)(centerline + dx + 640 * scl * i + infox), (int)(dy + 25 * scale * infoy / system->GetHeight()),
@@ -667,6 +705,12 @@ int UI2015::DrawInfomationBack(void) {
 	double scl, tmp;
 	int i, max;
 
+	// スクリーンショットの大きさ
+	int ssx = 640;
+	int ssy = 480;
+	double size_scale = 1.0;
+	GetSSSize(&ssx, &ssy, &size_scale, game[selectgame]);
+
 	DrawBackground();
 
 	dy = system->GetHeight() / 2;
@@ -687,8 +731,8 @@ int UI2015::DrawInfomationBack(void) {
 			if (0 <= infonum + i && infonum + i < max) {
 				MikanDraw->DrawTextureScalingC(system->GetGameSSTexture(game[selectgame]),
 					(int)(centerline + dx + 640 * scl * i + infox), (int)(dy + 25 * scale * infoy / system->GetHeight()),
-					0, 480 * (infonum + i), 640, 480,
-					scl * (1.0 - 0.1*fabs(640 * scl * i + infox) / (640 * scl))
+					0, ssy * (infonum + i), ssx, ssy,
+					scl * (1.0 - 0.1*fabs(640 * scl * i + infox) / (640 * scl)) * size_scale
 					);
 			}
 		}
@@ -756,14 +800,18 @@ int UI2015::DrawInfomationBack(void) {
 
 		if (system->GetGameSSTMax(game[selectgame]) > 1) {
 			MikanDraw->DrawTextureScalingC(system->GetGameSSTexture(game[selectgame]),
-				(int)(centerline + dx + 640 * (scl * infoy / system->GetHeight())), (int)(dy + 25 * scale * infoy / system->GetHeight()), 0, 480, 640, 480, (tmp + (scl - tmp) * infoy / system->GetHeight()) * 0.9);
+				(int)(centerline + dx + 640 * (scl * infoy / system->GetHeight())),
+				(int)(dy + 25 * scale * infoy / system->GetHeight()),
+				0, ssy, ssx, ssy, (tmp + (scl - tmp) * infoy / system->GetHeight()) * 0.9 * size_scale);
 		}
 
 		//tmp = tmp + (scl - tmp) * infoy / system->GetHeight();
 		tmp = 1.0 + (scl - 1.0) * infoy / system->GetHeight();
 		MikanDraw->DrawTextureScalingC(system->GetGameSSTexture(game[selectgame]),
 			(int)(centerline + dx), (int)(dy + 25 * scale * infoy / system->GetHeight()),
-			0, 0, 640, 480, (int)(boxsize * tmp * 1.4), (int)(boxsize * tmp * 480.0 / 640.0 * 1.4), 0);
+			0, 0, ssx, ssy,
+			(int)(boxsize * tmp * 1.4 * size_scale) * ssx / 640,
+			(int)(boxsize * tmp * 480.0 / 640.0 * 1.4 * size_scale) * ssy / 480, 0);
 
 		// ゲーム情報。
 		dx = 0;
@@ -1025,13 +1073,21 @@ double UI2015::DrawBox(int dx, int dy, int gamenum, double scl, unsigned char al
 	}
 	MikanDraw->SetColor(tex, 0xFFFFFFFF);
 
+	int ssx = 640;
+	int ssy = 480;
+	double size_scale = 1.0;
 	if (gamenum >= 0) {
 		texnum = system->GetGameSSTexture(gamenum);
+
+		// スクリーンショットの大きさ
+		GetSSSize(&ssx, &ssy, &size_scale, gamenum);
 	}
 	if (gamenum != -3) {
 		MikanDraw->SetAlpha(texnum, alpha);
 		MikanDraw->DrawTextureScalingC(texnum,
-			(int)(centerline + dx), dy, 0, 0, 640, 480, (int)(boxsize * scale * scl), (int)(boxsize * scl * 480.0 / 640.0), 0);
+			(int)(centerline + dx), dy, 0, 0, ssx, ssy,
+			(int)(boxsize * scale * scl * size_scale) * ssx / 640,
+			(int)(boxsize * scl * 480.0 / 640.0 * size_scale) * ssy / 480, 0);
 	}
 	if (gamenum == -1) {
 		// ミニゲーム。
