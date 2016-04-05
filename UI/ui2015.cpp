@@ -43,9 +43,17 @@ int UI2015::SetGames(int category) {
 	} else if (category == -3) {
 		// ミニゲームは1つにまとめ、残りは普通に表示。
 		if (minigamemax > 0) {
-			nowgames = system->GetGameNumbersNotCategory(9, game + 2, gamemax) + 2;
+			nowgames = system->GetGameNumbersNotCategory(9, game + 2, gamemax) + 1;
 			game[0] = -1; // ミニゲームのみ。
-			game[1] = -3; // 
+			// ミニゲーム以外がなければランダムは表示しない
+			if (nowgames > 1)
+			{
+				nowgames++;
+				game[1] = -3;
+			}
+		} else if(gamemax > 0) {
+			nowgames = system->GetGameNumbers(game, gamemax) + 1;//system->GetGameNumbersがうまく機能してない
+			game[0] = -3;
 		} else {
 			nowgames = system->GetGameNumbers(game, gamemax);
 		}
@@ -96,6 +104,10 @@ void UI2015::UserInit(void) {
 
 	if (gamemax > 0) {
 		game = (int *)calloc(gamemax + 2, sizeof(int));
+		for (int i = 0; i < gamemax; i++)
+		{
+			game[i] = 0;
+		}
 	} else {
 		game = NULL;
 	}
@@ -471,7 +483,6 @@ void UI2015::GetSSSize(int *ssx, int *ssy, double *scale, int gamenum)
 	// スクリーンショットの大きさ
 	*ssx = MikanDraw->GetTextureWidth(system->GetGameSSTexture(gamenum));
 	*ssy = MikanDraw->GetTextureHeight(system->GetGameSSTexture(gamenum));
-	// 局所変数のために{}でくくる
 	int ssnum = system->GetGameSSTMax(gamenum);
 	if (ssnum <= 0)
 	{

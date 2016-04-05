@@ -258,6 +258,7 @@ struct GameData
 	unsigned int cnum;                // 持っているカテゴリ数。
 	char category[ CATEGORY_MAX ];    // どのカテゴリに所属しているか。
 	char dvd;                         // DVD収録済みかどうか。
+	int minplnum;                     // 最小プレイ人数
 
 	StatisticsData today, total;	  // 統計データ
 };

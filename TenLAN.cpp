@@ -593,6 +593,14 @@ int TenLANSystem::InitGamelist( int gamemax, int *loadgame )
 						gamedata[ msel ].cnum = 0;
 						gamedata[msel].category[0] = 0;
 						gamedata[msel].imagenum = 1;
+						gamedata[msel].minplnum = 1;
+
+						// カテゴリー関係のデータを一時的に保存するため
+						int category[CATEGORY_MAX];
+						for (int i = 0; i < CATEGORY_MAX; i++)
+						{
+							category[i] = 0;
+						}
 						while(MikanFile->ReadLine( 0, buf, 512 ))
 						{
 							str = strtok_s( buf, "=", &tok );
@@ -656,16 +664,22 @@ int TenLANSystem::InitGamelist( int gamemax, int *loadgame )
 										gamedata[ msel ].category[ gamedata[ msel ].cnum ] = gamedata[ msel ].category[ gamedata[ msel ].cnum ] * 10 + tok[ r ] - '0';
 									} else if(tok[ r ] == ',')
 									{
-										++usecate[ gamedata[ msel ].category[ gamedata[ msel ].cnum ] ];
+										//++usecate[ gamedata[ msel ].category[ gamedata[ msel ].cnum ] ];
+										++category[ gamedata[ msel ].category[ gamedata[ msel ].cnum ] ];
 										++gamedata[ msel ].cnum;
 									}
 								}
-								++usecate[ gamedata[ msel ].category[ gamedata[ msel ].cnum ] ];
+								//++usecate[ gamedata[ msel ].category[ gamedata[ msel ].cnum ] ];
+								++category[ gamedata[ msel ].category[ gamedata[ msel ].cnum ] ];
 								++gamedata[ msel ].cnum;
 							}
 							else if (strcmp(str, "imagenum") == 0)
 							{
 								gamedata[msel].imagenum = atoi(strtok_s(NULL, "=", &tok));
+							}
+							else if (strcmp(str, "minplnum") == 0)
+							{
+								gamedata[msel].minplnum = atoi(strtok_s(NULL, "=", &tok));
 							}
 						}
 						MikanFile->Close( 0 );
@@ -683,13 +697,23 @@ int TenLANSystem::InitGamelist( int gamemax, int *loadgame )
 						gamedata[ msel ].today.playtime = 0;
 						gamedata[ msel ].total.playnum = 0;
 						gamedata[ msel ].total.playtime = 0;
-						++msel;
 
-						// 最大ゲーム数。
-						++_loadgame;
-						if(loadgame)
+						if (gamedata[msel].minplnum <= MikanInput->GetPadMount() ||
+							MikanInput->GetPadMount() == 0)//gamedata[msel].minplnum == 1)
 						{
-							*loadgame = _loadgame;
+							++msel;
+
+							// 最大ゲーム数。
+							++_loadgame;
+							if (loadgame)
+							{
+								*loadgame = _loadgame;
+							}
+							// カテゴリー
+							for (int i = 0; i < CATEGORY_MAX; i++)
+							{
+								usecate[ i ] += category[ i ];
+							}
 						}
 					}
 				}
@@ -1102,7 +1126,7 @@ int TenLANSystem::GetGameNumbers( int *gamearray, int gamenum, int start )
 			{
 				return count;
 			}
-			break;
+			//break;
 		}
 	}
 
