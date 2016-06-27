@@ -240,6 +240,7 @@ struct StatisticsData
 {
 	unsigned int playnum;	// プレイ回数
 	unsigned long playtime;	//プレイ時間
+	unsigned int score; // 評点の合計
 };
 
 //ゲームデータの構造体

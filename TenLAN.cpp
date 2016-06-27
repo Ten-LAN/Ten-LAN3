@@ -206,13 +206,15 @@ int TenLANSystem::LoadStatistics()
 			int pnum;// プレイ回数用
 			int total_h = 0, total_m = 0, total_s = 0;// 総プレイ時間用
 			int ave_m = 0, ave_s = 0;// 平均時間用
+			int score = 0; double ave_score = 0;// 評点用
 
 			char title[2048];// タイトル用
 
 			// 番号 ゲーム名 プレイ回数 総プレイ時間(時間、分、秒) 平均プレイ時間(分、秒)
-			check = fscanf_s(file, "%d %s %d回 %d:%d:%d %d:%d",
+			// 合計評点 平均評点
+			check = fscanf_s(file, "%d %s %d回 %d:%d:%d %d:%d %d %lf",
 				&number, title, sizeof(title), &pnum, &total_h, &total_m, &total_s,
-				&ave_m, &ave_s);
+				&ave_m, &ave_s, &score, &ave_score);
 
 			// 読み込みが終われば終了
 			if (check == EOF)
@@ -227,6 +229,7 @@ int TenLANSystem::LoadStatistics()
 				{
 					gamedata[n].total.playnum = pnum;
 					gamedata[n].total.playtime = total_h * 3600 + total_m * 60 + total_s;
+					gamedata[n].total.score = score;
 
 					break;
 				}
@@ -250,13 +253,15 @@ int TenLANSystem::LoadStatistics()
 			int pnum;// プレイ回数用
 			int total_h = 0, total_m = 0, total_s = 0;// 総プレイ時間用
 			int ave_m = 0, ave_s = 0;// 平均時間用
+			int score = 0; double ave_score = 0;// 評点
 
 			char title[2048];// タイトル用
 
 			// 番号 ゲーム名 プレイ回数 総プレイ時間(時間、分、秒) 平均プレイ時間(分、秒)
-			check = fscanf_s(file, "%d %s %d回 %d:%d:%d %d:%d",
+			// 合計評点 平均評点
+			check = fscanf_s(file, "%d %s %d回 %d:%d:%d %d:%d %d %lf",
 				&number, title, sizeof(title), &pnum, &total_h, &total_m, &total_s,
-				&ave_m, &ave_s);
+				&ave_m, &ave_s, &score, &ave_score);
 
 			// 読み込みが終われば終了
 			if (check == EOF)
@@ -271,6 +276,7 @@ int TenLANSystem::LoadStatistics()
 				{
 					gamedata[n].today.playnum = pnum;
 					gamedata[n].today.playtime = total_h * 3600 + total_m * 60 + total_s;
+					gamedata[n].today.score = score;
 
 					break;
 				}
@@ -321,6 +327,7 @@ int TenLANSystem::SaveStatistics(unsigned int gamenum, unsigned long playtime)
 			{
 				gamedata[n].today.playnum = 0;
 				gamedata[n].today.playtime = 0;
+				gamedata[n].today.score = 0;
 			}
 		}
 	}
@@ -339,11 +346,13 @@ int TenLANSystem::SaveStatistics(unsigned int gamenum, unsigned long playtime)
 	{
 		for (unsigned int n = 0; n < gamemax; n++)
 		{
-			// 平均プレイ時間(秒)
-			int ave = 0;
+			// 平均プレイ時間(秒)と平均評点
+			int ave = 0; double ave_score = 0;
 			if (gamedata[n].total.playnum > 0)
 			{
 				ave = gamedata[n].total.playtime / gamedata[n].total.playnum;
+				ave_score = (double)(gamedata[n].total.score)
+					/ (double)(gamedata[n].total.playnum);
 			}
 
 			// タイトル(改行コードや空白の修正)
@@ -364,12 +373,13 @@ int TenLANSystem::SaveStatistics(unsigned int gamenum, unsigned long playtime)
 			}
 
 			// 番号 ゲーム名 プレイ回数 総プレイ時間(時間、分、秒) 平均プレイ時間(分、秒)
-			fprintf_s(file, "%d %s %03d回 %02d:%02d:%02d %02d:%02d\n\0",
+			// 合計評点 平均評点
+			fprintf_s(file, "%d %s %03d回 %02d:%02d:%02d %02d:%02d %03d %1.3lf\n\0",
 				gamedata[n].num, title, gamedata[n].total.playnum,
 				gamedata[n].total.playtime / 3600,
 				(gamedata[n].total.playtime % 3600) / 60,
 				gamedata[n].total.playtime % 60,
-				ave / 60, ave % 60);
+				ave / 60, ave % 60, gamedata[n].total.score, ave_score);
 		}
 
 		fclose(file);
@@ -383,10 +393,12 @@ int TenLANSystem::SaveStatistics(unsigned int gamenum, unsigned long playtime)
 		for (unsigned int n = 0; n < gamemax; n++)
 		{
 			// 平均プレイ時間(秒)
-			int ave = 0;
+			int ave = 0; double ave_score = 0;
 			if (gamedata[n].today.playnum > 0)
 			{
 				ave = gamedata[n].today.playtime / gamedata[n].today.playnum;
+				ave_score = (double)(gamedata[n].today.score)
+					/ (double)(gamedata[n].today.playnum);
 			}
 
 			// タイトル(改行コードや空白の修正)
@@ -407,12 +419,13 @@ int TenLANSystem::SaveStatistics(unsigned int gamenum, unsigned long playtime)
 			}
 
 			// 番号 ゲーム名 プレイ回数 総プレイ時間(時間、分、秒) 平均プレイ時間(分、秒)
-			fprintf_s(file, "%d %s %03d回 %02d:%02d:%02d %02d:%02d\n\0",
+			// 合計評点 平均評点
+			fprintf_s(file, "%d %s %03d回 %02d:%02d:%02d %02d:%02d %03d %1.3lf\n\0",
 				gamedata[n].num, title, gamedata[n].today.playnum,
 				gamedata[n].today.playtime / 3600,
 				(gamedata[n].today.playtime % 3600) / 60,
 				gamedata[n].today.playtime % 60,
-				ave / 60, ave % 60);
+				ave / 60, ave % 60, gamedata[n].today.score, ave_score);
 		}
 
 		fclose(file);
@@ -695,11 +708,13 @@ int TenLANSystem::InitGamelist( int gamemax, int *loadgame )
 						// ゲームの統計データを初期化
 						gamedata[ msel ].today.playnum = 0;
 						gamedata[ msel ].today.playtime = 0;
+						gamedata[ msel ].today.score = 0;
 						gamedata[ msel ].total.playnum = 0;
 						gamedata[ msel ].total.playtime = 0;
+						gamedata[ msel ].total.score = 0;
 
 						if (gamedata[msel].minplnum <= MikanInput->GetPadMount() ||
-							MikanInput->GetPadMount() == 0)//gamedata[msel].minplnum == 1)
+							MikanInput->GetPadMount() == 0)
 						{
 							++msel;
 
@@ -720,6 +735,8 @@ int TenLANSystem::InitGamelist( int gamemax, int *loadgame )
 			}
 		} while(FindNextFile( hdir, &status ));
 		FindClose( hdir );
+
+		this->gamemax = _loadgame;
 
 		// 統計データの読み込み
 		LoadStatistics();
