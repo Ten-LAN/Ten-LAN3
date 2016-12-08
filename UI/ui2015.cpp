@@ -16,6 +16,7 @@ void UI2015::SetBGMVolume()
 	MikanSound->SetVolume(1, volume / 2);
 	MikanSound->SetVolume(2, volume / 2);
 	MikanSound->SetVolume(3, volume / 2);
+	MikanSound->SetVolume(4, volume);
 }
 
 // SE音量設定
@@ -74,12 +75,13 @@ void UI2015::UserInit(void) {
 	ranTex = system->AddTexture(NULL, "RANDOM");
 	
 	// BGM
-	bgmnum = 4; //デフォ含めた曲数
+	bgmnum = 5; //デフォ含めた曲数
 
 	MikanSound->Load(0, NULL, "MAINTHEME");
 	MikanSound->Load(1, NULL, "SELECT_BGM1");
 	MikanSound->Load(2, NULL, "SELECT_BGM2");
 	MikanSound->Load(3, NULL, "SELECT_BGM3");
+	MikanSound->Load(4, NULL, "SELECT_BGM4");
 
 	imagenum = 3;
 	image = static_cast<int*>(malloc(sizeof(int) * imagenum));
@@ -148,6 +150,10 @@ void UI2015::Resume(void) {
 	else
 	{
 		curimage = curbgm - 1;
+		if (curbgm == 4)
+		{
+			curimage = 2;
+		}
 	}
 }
 

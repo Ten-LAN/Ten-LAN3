@@ -1,8 +1,21 @@
-GAME_ICON ICON "icon.ico"
+﻿GAME_ICON ICON "icon.ico"
 
 SYSFONT    FONTFILE "./material/migmix-1m-regular.ttf"
 SYSIMG     IMAGE    "./material/startup.png"
 
 MAINTHEME  SOUND    "./material/BigPresent.ogg"
+SELECT_BGM1  SOUND  "./material/TEN_LAN2015_sky.ogg"
+SELECT_BGM2  SOUND  "./material/SPACE_OGG.ogg"
+SELECT_BGM3  SOUND  "./material/SUMMER_OGG.ogg"
+SELECT_BGM4  SOUND  "./material/dancingonthebeach.ogg"
 
-DEFAULTIMG IMAGE    "./material/default.png"
+BG_IMAGE1  IMAGE    "./material/sora.png"
+BG_IMAGE2  IMAGE    "./material/space.png"
+BG_IMAGE3  IMAGE    "./material/umi.png"
+
+
+OK_SE       SOUND    "./material/ok.wav"
+SELECT_SE   SOUND    "./material/select.wav"
+
+DEFAULTIMG  IMAGE    "./material/default.png"
+RANDOM      IMAGE    "./material/random.png"
